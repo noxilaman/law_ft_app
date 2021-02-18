@@ -23,7 +23,6 @@ Future<Appdata> fetchAppdata() async {
   } else {
     // If the server did not return a 200 OK response,
     // then throw an exception.
-    debugPrint('movieddddddTitleError ');
     throw Exception('Failed to load album');
   }
 }
@@ -82,8 +81,32 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         title: Text('Home'),
       ),
-      body: Center(
-                child: FutureBuilder<Appdata>(
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              FutureBuilder<Appdata>(
+                  future: futureAppdata,
+                  builder: (context, AsyncSnapshot<Appdata> snapshot) {
+                    switch (snapshot.connectionState) {
+                      case ConnectionState.none:
+                        return Text('none');
+                      case ConnectionState.waiting:
+                        return Center(child: CircularProgressIndicator());
+                      case ConnectionState.active:
+                        return Text('');
+                      case ConnectionState.done:
+                        if (snapshot.hasData) {
+                          return Center( child: Text( snapshot.data.name,style: TextStyle(color: Colors.black,fontSize: 25,fontWeight: FontWeight.bold)));
+                        } else if (snapshot.hasError) {
+                          return Text("${snapshot.error}");
+                        }
+                        // By default, show a loading spinner.
+                        return CircularProgressIndicator();
+                    }
+                  }
+              ),
+              FutureBuilder<Appdata>(
                   future: futureAppdata,
                   builder: (context, AsyncSnapshot<Appdata> snapshot) {
                     switch (snapshot.connectionState) {
@@ -118,7 +141,9 @@ class _HomeState extends State<Home> {
                         return CircularProgressIndicator();
                     }
                   }
-                ),
+              ),
+            ],
+
       ),
       drawer: SideMenu(),
     );
